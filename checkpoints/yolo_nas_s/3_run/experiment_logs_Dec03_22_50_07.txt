@@ -1,0 +1,622 @@
+--------- config parameters ----------
+{
+    "checkpoint_params": {
+        "load_checkpoint": false,
+        "schema": null
+    },
+    "training_hyperparams": {
+        "lr_warmup_epochs": 3,
+        "lr_warmup_steps": 0,
+        "lr_cooldown_epochs": 0,
+        "warmup_initial_lr": 1e-06,
+        "cosine_final_lr_ratio": 0.1,
+        "optimizer": "AdamW",
+        "optimizer_params": {
+            "weight_decay": 0.0001
+        },
+        "criterion_params": {},
+        "ema": true,
+        "batch_accumulate": 1,
+        "ema_params": {
+            "beta": 25,
+            "decay_type": "exp"
+        },
+        "zero_weight_decay_on_bias_and_bn": true,
+        "load_opt_params": true,
+        "run_validation_freq": 1,
+        "run_test_freq": 1,
+        "save_model": true,
+        "metric_to_watch": "mAP@0.50",
+        "launch_tensorboard": false,
+        "tb_files_user_prompt": false,
+        "silent_mode": false,
+        "mixed_precision": true,
+        "tensorboard_port": null,
+        "save_ckpt_epoch_list": [],
+        "average_best_models": true,
+        "dataset_statistics": false,
+        "save_tensorboard_to_s3": false,
+        "lr_schedule_function": null,
+        "train_metrics_list": [],
+        "valid_metrics_list": [
+            "DetectionMetrics_050(\n  (post_prediction_callback): PPYoloEPostPredictionCallback()\n)"
+        ],
+        "greater_metric_to_watch_is_better": true,
+        "precise_bn": false,
+        "precise_bn_batch_size": null,
+        "seed": 42,
+        "lr_mode": "cosine",
+        "phase_callbacks": null,
+        "log_installed_packages": true,
+        "sg_logger": "base_sg_logger",
+        "sg_logger_params": {
+            "tb_files_user_prompt": false,
+            "project_name": "",
+            "launch_tensorboard": false,
+            "tensorboard_port": null,
+            "save_checkpoints_remote": false,
+            "save_tensorboard_remote": false,
+            "save_logs_remote": false
+        },
+        "warmup_mode": "LinearEpochLRWarmup",
+        "step_lr_update_freq": null,
+        "lr_updates": [],
+        "initial_lr": 0.0005,
+        "clip_grad_norm": null,
+        "pre_prediction_callback": null,
+        "ckpt_best_name": "ckpt_best.pth",
+        "enable_qat": false,
+        "resume": false,
+        "resume_path": null,
+        "ckpt_name": "ckpt_latest.pth",
+        "resume_strict_load": false,
+        "sync_bn": false,
+        "kill_ddp_pgroup_on_end": true,
+        "max_train_batches": null,
+        "max_valid_batches": null,
+        "resume_from_remote_sg_logger": false,
+        "torch_compile": false,
+        "torch_compile_loss": false,
+        "torch_compile_options": {
+            "mode": "reduce-overhead",
+            "fullgraph": false,
+            "dynamic": false,
+            "backend": "inductor",
+            "options": null,
+            "disable": false
+        },
+        "schema": {
+            "type": "object",
+            "properties": {
+                "max_epochs": {
+                    "type": "number",
+                    "minimum": 1
+                },
+                "lr_decay_factor": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                },
+                "lr_warmup_epochs": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10
+                },
+                "initial_lr": {
+                    "anyOf": [
+                        {
+                            "type": [
+                                "number",
+                                "string",
+                                "boolean",
+                                "null"
+                            ]
+                        },
+                        {
+                            "type": "object",
+                            "patternProperties": {
+                                "^[a-zA-Z0-9_.]+$": {
+                                    "type": "number"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                }
+            },
+            "if": {
+                "properties": {
+                    "lr_mode": {
+                        "const": "StepLRScheduler"
+                    }
+                }
+            },
+            "then": {
+                "required": [
+                    "lr_updates",
+                    "lr_decay_factor"
+                ]
+            },
+            "required": [
+                "max_epochs",
+                "lr_mode",
+                "initial_lr",
+                "loss"
+            ]
+        },
+        "max_epochs": 30,
+        "loss": "PPYoloELoss(\n  (static_assigner): ATSSAssigner()\n  (assigner): TaskAlignedAssigner()\n)"
+    },
+    "dataset_params": {
+        "train_dataset_params": {
+            "data_dir": "YN-HT-s",
+            "images_dir": "images/train",
+            "labels_dir": "labels/train",
+            "classes": [
+                "Head"
+            ],
+            "input_dim": [
+                1920,
+                1088
+            ],
+            "transforms": [
+                "DetectionRandomAffine('additional_samples_count': 0, 'non_empty_targets': False, 'degrees': 0.0, 'translate': 0.1, 'scale': (0.5, 1.5), 'shear': 0.0, 'target_size': (1920, 1088), 'enable': True, 'filter_box_candidates': False, 'wh_thr': 2, 'ar_thr': 20, 'area_thr': 0.1, 'border_value': 128)",
+                "DetectionHSV('additional_samples_count': 0, 'non_empty_targets': False, 'prob': 1.0, 'hgain': 5, 'sgain': 30, 'vgain': 30, 'bgr_channels': (0, 1, 2), '_additional_channels_warned': False)",
+                "DetectionHorizontalFlip('additional_samples_count': 0, 'non_empty_targets': False, 'prob': 0.5)",
+                "DetectionPaddedRescale('additional_samples_count': 0, 'non_empty_targets': False, 'swap': (2, 0, 1), 'input_dim': (1920, 1088), 'pad_value': 114)",
+                "DetectionStandardize('additional_samples_count': 0, 'non_empty_targets': False, 'max_value': 255)",
+                "DetectionTargetsFormatTransform('additional_samples_count': 0, 'non_empty_targets': False, 'input_format': OrderedDict([('bboxes', name=bboxes length=4 format=<super_gradients.training.datasets.data_formats.bbox_formats.xyxy.XYXYCoordinateFormat object at 0x0000014EA07443D0>), ('labels', name=labels length=1)]), 'output_format': OrderedDict([('labels', name=labels length=1), ('bboxes', name=bboxes length=4 format=<super_gradients.training.datasets.data_formats.bbox_formats.cxcywh.CXCYWHCoordinateFormat object at 0x0000014EA076E3A0>)]), 'min_bbox_edge_size': 1, 'input_dim': (1920, 1088), 'targets_format_converter': <super_gradients.training.datasets.data_formats.format_converter.ConcatenatedTensorFormatConverter object at 0x0000014EF43E3070>)"
+            ],
+            "cache_dir": null,
+            "cache": false,
+            "cache_annotations": true,
+            "ignore_empty_annotations": true,
+            "class_inclusion_list": null,
+            "max_num_samples": null
+        },
+        "train_dataloader_params": {
+            "shuffle": true,
+            "drop_last": true,
+            "pin_memory": true,
+            "batch_size": 2,
+            "num_workers": 4,
+            "persistent_workers": true,
+            "collate_fn": "<super_gradients.training.utils.collate_fn.detection_collate_fn.DetectionCollateFN object at 0x0000014EA2DA4C40>"
+        },
+        "valid_dataset_params": "{'data_dir': 'YN-HT-s', 'images_dir': 'images/val', 'labels_dir': 'labels/val', 'classes': ['Head'], 'input_dim': [1920, 1088], 'cache_dir': None, 'cache': False, 'cache_annotations': True, 'ignore_empty_annotations': True, 'transforms': [{'DetectionPaddedRescale': {'input_dim': [1920, 1088]}}, {'DetectionTargetsFormatTransform': {'input_dim': [1920, 1088], 'output_format': 'LABEL_CXCYWH'}}], 'class_inclusion_list': None, 'max_num_samples': None}",
+        "valid_dataloader_params": {
+            "shuffle": false,
+            "drop_last": false,
+            "pin_memory": true,
+            "batch_size": 2,
+            "num_workers": 4,
+            "persistent_workers": true,
+            "collate_fn": "<super_gradients.training.utils.collate_fn.detection_collate_fn.DetectionCollateFN object at 0x0000014EA3F21040>"
+        }
+    },
+    "additional_log_items": {
+        "initial_LR": 0.0005,
+        "num_devices": 1,
+        "multi_gpu": "None",
+        "device_type": "NVIDIA GeForce RTX 4070 Ti",
+        "installed_packages": {
+            "babel": "2.13.1",
+            "deprecated": "1.2.14",
+            "gitpython": "3.1.40",
+            "jinja2": "3.1.2",
+            "mako": "1.3.0",
+            "markdown": "3.5.1",
+            "markupsafe": "2.1.3",
+            "pillow": "10.1.0",
+            "pyjwt": "2.8.0",
+            "pyyaml": "6.0.1",
+            "sqlalchemy": "2.0.23",
+            "sphinx": "4.0.3",
+            "absl-py": "2.0.0",
+            "aiohttp": "3.9.1",
+            "aiosignal": "1.3.1",
+            "alabaster": "0.7.13",
+            "alembic": "1.13.0",
+            "antlr4-python3-runtime": "4.9.3",
+            "arabic-reshaper": "3.0.0",
+            "asn1crypto": "1.5.1",
+            "async-timeout": "4.0.3",
+            "attrs": "23.1.0",
+            "blinker": "1.7.0",
+            "boto3": "1.33.5",
+            "botocore": "1.33.5",
+            "build": "1.0.3",
+            "cachetools": "5.3.2",
+            "certifi": "2023.11.17",
+            "cffi": "1.16.0",
+            "charset-normalizer": "3.3.2",
+            "click": "8.1.7",
+            "cloudpickle": "2.2.1",
+            "colorama": "0.4.6",
+            "coloredlogs": "15.0.1",
+            "contourpy": "1.2.0",
+            "coverage": "5.3.1",
+            "cryptography": "41.0.7",
+            "cssselect2": "0.7.0",
+            "cuda-python": "12.3.0",
+            "cycler": "0.12.1",
+            "data-gradients": "0.3.1",
+            "databricks-cli": "0.18.0",
+            "docker": "6.1.3",
+            "docutils": "0.17.1",
+            "einops": "0.3.2",
+            "entrypoints": "0.4",
+            "filelock": "3.13.1",
+            "flask": "3.0.0",
+            "flatbuffers": "23.5.26",
+            "fonttools": "4.45.1",
+            "frozenlist": "1.4.0",
+            "fsspec": "2023.10.0",
+            "future": "0.18.3",
+            "gitdb": "4.0.11",
+            "google-auth": "2.24.0",
+            "google-auth-oauthlib": "1.1.0",
+            "greenlet": "3.0.1",
+            "grpcio": "1.59.3",
+            "html5lib": "1.1",
+            "humanfriendly": "10.0",
+            "hydra-core": "1.3.2",
+            "idna": "3.6",
+            "imagededup": "0.3.2",
+            "imagesize": "1.4.1",
+            "importlib-metadata": "6.8.0",
+            "importlib-resources": "6.1.1",
+            "itsdangerous": "2.1.2",
+            "jmespath": "1.0.1",
+            "joblib": "1.3.2",
+            "json-tricks": "3.16.1",
+            "jsonschema": "4.20.0",
+            "jsonschema-specifications": "2023.11.2",
+            "kiwisolver": "1.4.5",
+            "lightning-utilities": "0.10.0",
+            "lxml": "4.9.3",
+            "markdown-it-py": "3.0.0",
+            "matplotlib": "3.8.2",
+            "mdurl": "0.1.2",
+            "mlflow": "2.8.1",
+            "mpmath": "1.3.0",
+            "multidict": "6.0.4",
+            "networkx": "3.2.1",
+            "numpy": "1.23.0",
+            "oauthlib": "3.2.2",
+            "omegaconf": "2.3.0",
+            "onnx": "1.13.0",
+            "onnx-simplifier": "0.4.35",
+            "onnxruntime": "1.13.1",
+            "onnxruntime-gpu": "1.16.3",
+            "opencv-python": "4.8.1.78",
+            "oscrypto": "1.3.0",
+            "packaging": "23.2",
+            "pandas": "2.1.3",
+            "pip": "23.3.1",
+            "pip-tools": "7.3.0",
+            "platformdirs": "4.0.0",
+            "protobuf": "3.20.3",
+            "psutil": "5.9.6",
+            "pydeprecate": "0.3.2",
+            "pyhanko": "0.21.0",
+            "pyarrow": "14.0.1",
+            "pyasn1": "0.5.1",
+            "pyasn1-modules": "0.3.0",
+            "pycocotools": "2.0.6",
+            "pycparser": "2.21",
+            "pygments": "2.17.2",
+            "pyhanko-certvalidator": "0.26.2",
+            "pyparsing": "2.4.5",
+            "pypdf": "3.17.1",
+            "pypng": "0.20220715.0",
+            "pyproject-hooks": "1.0.0",
+            "pyreadline3": "3.4.1",
+            "python-bidi": "0.4.2",
+            "python-dateutil": "2.8.2",
+            "pytorch-lightning": "2.1.2",
+            "pytz": "2023.3.post1",
+            "pywavelets": "1.5.0",
+            "pywin32": "306",
+            "qrcode": "7.4.2",
+            "querystring-parser": "1.2.4",
+            "rapidfuzz": "3.5.2",
+            "referencing": "0.31.1",
+            "reportlab": "3.6.13",
+            "requests": "2.31.0",
+            "requests-oauthlib": "1.3.1",
+            "rich": "13.7.0",
+            "rpds-py": "0.13.2",
+            "rsa": "4.9",
+            "s3transfer": "0.8.2",
+            "scikit-learn": "1.3.2",
+            "scipy": "1.11.4",
+            "seaborn": "0.13.0",
+            "setuptools": "68.2.0",
+            "six": "1.16.0",
+            "smmap": "5.0.1",
+            "snowballstemmer": "2.2.0",
+            "sphinx-rtd-theme": "1.3.0",
+            "sphinxcontrib-applehelp": "1.0.4",
+            "sphinxcontrib-devhelp": "1.0.2",
+            "sphinxcontrib-htmlhelp": "2.0.1",
+            "sphinxcontrib-jquery": "4.1",
+            "sphinxcontrib-jsmath": "1.0.1",
+            "sphinxcontrib-qthelp": "1.0.3",
+            "sphinxcontrib-serializinghtml": "1.1.5",
+            "sqlparse": "0.4.4",
+            "stringcase": "1.2.0",
+            "super-gradients": "3.5.0",
+            "svglib": "1.5.1",
+            "sympy": "1.12",
+            "tabulate": "0.9.0",
+            "tensorboard": "2.15.1",
+            "tensorboard-data-server": "0.7.2",
+            "termcolor": "1.1.0",
+            "threadpoolctl": "3.2.0",
+            "tinycss2": "1.2.1",
+            "tomli": "2.0.1",
+            "torch": "2.1.1+cu121",
+            "torchaudio": "2.1.1+cu121",
+            "torchmetrics": "0.8.0",
+            "torchvision": "0.16.1+cu121",
+            "tqdm": "4.66.1",
+            "treelib": "1.6.1",
+            "typing-extensions": "4.8.0",
+            "tzdata": "2023.3",
+            "tzlocal": "5.2",
+            "uritools": "4.0.2",
+            "urllib3": "1.26.18",
+            "waitress": "2.1.2",
+            "webencodings": "0.5.1",
+            "websocket-client": "1.6.4",
+            "werkzeug": "3.0.1",
+            "wheel": "0.41.2",
+            "wrapt": "1.16.0",
+            "xhtml2pdf": "0.2.11",
+            "yarl": "1.9.3",
+            "zipp": "3.17.0"
+        }
+    }
+}
+------- config parameters end --------
+
+Epoch 1 (2/30)  - Train_Inference_Time: 83821.5625	Train_PPYoloELoss/loss_cls: 1.595868468284607	Train_PPYoloELoss/loss_iou: 1.306764841079712	Train_PPYoloELoss/loss_dfl: 0.41773054003715515	Train_PPYoloELoss/loss: 3.320364236831665	
+
+Epoch 1 (2/30)  - Valid_Inference_Time: 19548.0234375	Valid_PPYoloELoss/loss_cls: 0.5478143692016602	Valid_PPYoloELoss/loss_iou: 0.2250077873468399	Valid_PPYoloELoss/loss_dfl: 0.19529633224010468	Valid_PPYoloELoss/loss: 0.9681186676025391	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 1 (2/30)  - Test_Inference_Time: 0.0	
+
+Epoch 1 (2/30)  - LR/default: 1e-06	
+
+Epoch 2 (3/30)  - Train_Inference_Time: 81363.6953125	Train_PPYoloELoss/loss_cls: 0.9626393914222717	Train_PPYoloELoss/loss_iou: 0.7707189321517944	Train_PPYoloELoss/loss_dfl: 0.28378745913505554	Train_PPYoloELoss/loss: 2.0171456336975098	
+
+Epoch 2 (3/30)  - Valid_Inference_Time: 7981.84423828125	Valid_PPYoloELoss/loss_cls: 16.56744956970215	Valid_PPYoloELoss/loss_iou: 0.11799578368663788	Valid_PPYoloELoss/loss_dfl: 0.04781307280063629	Valid_PPYoloELoss/loss: 16.73325538635254	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 2 (3/30)  - Test_Inference_Time: 0.0	
+
+Epoch 2 (3/30)  - LR/default: 0.00016733333333333333	
+
+Epoch 3 (4/30)  - Train_Inference_Time: 81042.0859375	Train_PPYoloELoss/loss_cls: 0.8927647471427917	Train_PPYoloELoss/loss_iou: 0.6778513193130493	Train_PPYoloELoss/loss_dfl: 0.2762908339500427	Train_PPYoloELoss/loss: 1.8469066619873047	
+
+Epoch 3 (4/30)  - Valid_Inference_Time: 7993.42431640625	Valid_PPYoloELoss/loss_cls: 12682.7099609375	Valid_PPYoloELoss/loss_iou: 0.005755976773798466	Valid_PPYoloELoss/loss_dfl: 0.007404609117656946	Valid_PPYoloELoss/loss: 12682.7236328125	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 3 (4/30)  - Test_Inference_Time: 0.0	
+
+Epoch 3 (4/30)  - LR/default: 0.0003336666666666667	
+
+Epoch 4 (5/30)  - Train_Inference_Time: 83942.0	Train_PPYoloELoss/loss_cls: 0.8822016716003418	Train_PPYoloELoss/loss_iou: 0.6601275205612183	Train_PPYoloELoss/loss_dfl: 0.27386119961738586	Train_PPYoloELoss/loss: 1.81619131565094	
+
+Epoch 4 (5/30)  - Valid_Inference_Time: 8040.552734375	Valid_PPYoloELoss/loss_cls: 108553.5625	Valid_PPYoloELoss/loss_iou: 0.00014367126277647913	Valid_PPYoloELoss/loss_dfl: 0.0001478480699006468	Valid_PPYoloELoss/loss: 108553.5625	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 4 (5/30)  - Test_Inference_Time: 0.0	
+
+Epoch 4 (5/30)  - LR/default: 0.0005	
+
+Epoch 5 (6/30)  - Train_Inference_Time: 81641.984375	Train_PPYoloELoss/loss_cls: 0.8388250470161438	Train_PPYoloELoss/loss_iou: 0.5897246599197388	Train_PPYoloELoss/loss_dfl: 0.27092012763023376	Train_PPYoloELoss/loss: 1.6994704008102417	
+
+Epoch 5 (6/30)  - Valid_Inference_Time: 7942.98583984375	Valid_PPYoloELoss/loss_cls: 75880.71875	Valid_PPYoloELoss/loss_iou: 3.3522226772220165e-08	Valid_PPYoloELoss/loss_dfl: 1.0852891563217781e-07	Valid_PPYoloELoss/loss: 75880.71875	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 5 (6/30)  - Test_Inference_Time: 0.0	
+
+Epoch 5 (6/30)  - LR/default: 0.0004984853287108102	
+
+Epoch 6 (7/30)  - Train_Inference_Time: 81428.3046875	Train_PPYoloELoss/loss_cls: 0.8350086808204651	Train_PPYoloELoss/loss_iou: 0.5772102475166321	Train_PPYoloELoss/loss_dfl: 0.269585520029068	Train_PPYoloELoss/loss: 1.6818042993545532	
+
+Epoch 6 (7/30)  - Valid_Inference_Time: 7881.828125	Valid_PPYoloELoss/loss_cls: 40.02631378173828	Valid_PPYoloELoss/loss_iou: 1.4011020539328456e-06	Valid_PPYoloELoss/loss_dfl: 5.259643671706726e-07	Valid_PPYoloELoss/loss: 40.02632141113281	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 6 (7/30)  - Test_Inference_Time: 0.0	
+
+Epoch 6 (7/30)  - LR/default: 0.0004939488843572887	
+
+Epoch 7 (8/30)  - Train_Inference_Time: 81407.96875	Train_PPYoloELoss/loss_cls: 0.8210456371307373	Train_PPYoloELoss/loss_iou: 0.5551131963729858	Train_PPYoloELoss/loss_dfl: 0.26873013377189636	Train_PPYoloELoss/loss: 1.6448904275894165	
+
+Epoch 7 (8/30)  - Valid_Inference_Time: 7942.888671875	Valid_PPYoloELoss/loss_cls: 0.22418275475502014	Valid_PPYoloELoss/loss_iou: 5.037020400777692e-07	Valid_PPYoloELoss/loss_dfl: 3.7877373415540205e-07	Valid_PPYoloELoss/loss: 0.22418364882469177	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 7 (8/30)  - Test_Inference_Time: 0.0	
+
+Epoch 7 (8/30)  - LR/default: 0.0004864519980166835	
+
+Epoch 8 (9/30)  - Train_Inference_Time: 81074.140625	Train_PPYoloELoss/loss_cls: 0.810531735420227	Train_PPYoloELoss/loss_iou: 0.5372387170791626	Train_PPYoloELoss/loss_dfl: 0.2679392993450165	Train_PPYoloELoss/loss: 1.615709900856018	
+
+Epoch 8 (9/30)  - Valid_Inference_Time: 7672.603515625	Valid_PPYoloELoss/loss_cls: 0.049032244831323624	Valid_PPYoloELoss/loss_iou: 4.370545880760801e-08	Valid_PPYoloELoss/loss_dfl: 1.9891370328650737e-08	Valid_PPYoloELoss/loss: 0.0490323081612587	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 8 (9/30)  - Test_Inference_Time: 0.0	
+
+Epoch 8 (9/30)  - LR/default: 0.0004760960362575444	
+
+Epoch 9 (10/30)  - Train_Inference_Time: 95753.5703125	Train_PPYoloELoss/loss_cls: 0.805020809173584	Train_PPYoloELoss/loss_iou: 0.5271877646446228	Train_PPYoloELoss/loss_dfl: 0.2673022747039795	Train_PPYoloELoss/loss: 1.599510908126831	
+
+Epoch 9 (10/30)  - Valid_Inference_Time: 8477.9501953125	Valid_PPYoloELoss/loss_cls: 0.010820670053362846	Valid_PPYoloELoss/loss_iou: 5.540264247372306e-09	Valid_PPYoloELoss/loss_dfl: 9.144986989895187e-09	Valid_PPYoloELoss/loss: 0.010820684023201466	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 9 (10/30)  - Test_Inference_Time: 0.0	
+
+Epoch 9 (10/30)  - LR/default: 0.00046302102365272256	
+
+Epoch 10 (11/30)  - Train_Inference_Time: 81914.0625	Train_PPYoloELoss/loss_cls: 0.7992658615112305	Train_PPYoloELoss/loss_iou: 0.5159726738929749	Train_PPYoloELoss/loss_dfl: 0.26703259348869324	Train_PPYoloELoss/loss: 1.5822709798812866	
+
+Epoch 10 (11/30)  - Valid_Inference_Time: 7643.4970703125	Valid_PPYoloELoss/loss_cls: 0.000491555139888078	Valid_PPYoloELoss/loss_iou: 2.7161359383853778e-08	Valid_PPYoloELoss/loss_dfl: 1.3285776034877017e-08	Valid_PPYoloELoss/loss: 0.000491595477797091	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 10 (11/30)  - Test_Inference_Time: 0.0	
+
+Epoch 10 (11/30)  - LR/default: 0.0004474037494852993	
+
+Epoch 11 (12/30)  - Train_Inference_Time: 201179.765625	Train_PPYoloELoss/loss_cls: 0.7857233881950378	Train_PPYoloELoss/loss_iou: 0.5013769865036011	Train_PPYoloELoss/loss_dfl: 0.2664513885974884	Train_PPYoloELoss/loss: 1.5535515546798706	
+
+Epoch 11 (12/30)  - Valid_Inference_Time: 9223.771484375	Valid_PPYoloELoss/loss_cls: 5.2070230594836175e-05	Valid_PPYoloELoss/loss_iou: 5.787065049389639e-08	Valid_PPYoloELoss/loss_dfl: 2.4068675941180118e-08	Valid_PPYoloELoss/loss: 5.2152165153529495e-05	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 11 (12/30)  - Test_Inference_Time: 0.0	
+
+Epoch 11 (12/30)  - LR/default: 0.0004294553773531379	
+
+Epoch 12 (13/30)  - Train_Inference_Time: 104976.8125	Train_PPYoloELoss/loss_cls: 0.79208904504776	Train_PPYoloELoss/loss_iou: 0.5019490122795105	Train_PPYoloELoss/loss_dfl: 0.26625093817710876	Train_PPYoloELoss/loss: 1.5602890253067017	
+
+Epoch 12 (13/30)  - Valid_Inference_Time: 8095.1044921875	Valid_PPYoloELoss/loss_cls: 2.060019689553716e-11	Valid_PPYoloELoss/loss_iou: 1.9979748344667314e-07	Valid_PPYoloELoss/loss_dfl: 1.1760469220689629e-07	Valid_PPYoloELoss/loss: 3.1742280270918855e-07	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 12 (13/30)  - Test_Inference_Time: 0.0	
+
+Epoch 12 (13/30)  - LR/default: 0.00040941858999296875	
+
+Epoch 13 (14/30)  - Train_Inference_Time: 88599.953125	Train_PPYoloELoss/loss_cls: 0.7855759263038635	Train_PPYoloELoss/loss_iou: 0.4944379925727844	Train_PPYoloELoss/loss_dfl: 0.2661157250404358	Train_PPYoloELoss/loss: 1.546129584312439	
+
+Epoch 13 (14/30)  - Valid_Inference_Time: 10147.2890625	Valid_PPYoloELoss/loss_cls: 2.0581916379547316e-11	Valid_PPYoloELoss/loss_iou: 1.0603551459098526e-07	Valid_PPYoloELoss/loss_dfl: 9.993934924068526e-08	Valid_PPYoloELoss/loss: 2.0599543404387077e-07	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 13 (14/30)  - Test_Inference_Time: 0.0	
+
+Epoch 13 (14/30)  - LR/default: 0.00038756430792928495	
+
+Epoch 14 (15/30)  - Train_Inference_Time: 83083.1875	Train_PPYoloELoss/loss_cls: 0.7758399844169617	Train_PPYoloELoss/loss_iou: 0.47823473811149597	Train_PPYoloELoss/loss_dfl: 0.26592257618904114	Train_PPYoloELoss/loss: 1.5199984312057495	
+
+Epoch 14 (15/30)  - Valid_Inference_Time: 7603.7421875	Valid_PPYoloELoss/loss_cls: 0.00014197123527992517	Valid_PPYoloELoss/loss_iou: 0.0018096428830176592	Valid_PPYoloELoss/loss_dfl: 0.001543255872093141	Valid_PPYoloELoss/loss: 0.0034948692191392183	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 14 (15/30)  - Test_Inference_Time: 0.0	
+
+Epoch 14 (15/30)  - LR/default: 0.0003641880263157104	
+
+Epoch 15 (16/30)  - Train_Inference_Time: 83327.9140625	Train_PPYoloELoss/loss_cls: 0.76582932472229	Train_PPYoloELoss/loss_iou: 0.466736376285553	Train_PPYoloELoss/loss_dfl: 0.26540178060531616	Train_PPYoloELoss/loss: 1.497968316078186	
+
+Epoch 15 (16/30)  - Valid_Inference_Time: 8114.0927734375	Valid_PPYoloELoss/loss_cls: 0.001770300092175603	Valid_PPYoloELoss/loss_iou: 0.007688538637012243	Valid_PPYoloELoss/loss_dfl: 0.00394051056355238	Valid_PPYoloELoss/loss: 0.013399351388216019	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 15 (16/30)  - Test_Inference_Time: 0.0	
+
+Epoch 15 (16/30)  - LR/default: 0.00033960581949897604	
+
+Epoch 16 (17/30)  - Train_Inference_Time: 81124.34375	Train_PPYoloELoss/loss_cls: 0.7703653573989868	Train_PPYoloELoss/loss_iou: 0.4641878008842468	Train_PPYoloELoss/loss_dfl: 0.26472705602645874	Train_PPYoloELoss/loss: 1.499279499053955	
+
+Epoch 16 (17/30)  - Valid_Inference_Time: 8144.671875	Valid_PPYoloELoss/loss_cls: 0.004104794934391975	Valid_PPYoloELoss/loss_iou: 0.007475320715457201	Valid_PPYoloELoss/loss_dfl: 0.004175061825662851	Valid_PPYoloELoss/loss: 0.015755178406834602	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 16 (17/30)  - Test_Inference_Time: 0.0	
+
+Epoch 16 (17/30)  - LR/default: 0.0003141500673284201	
+
+Epoch 17 (18/30)  - Train_Inference_Time: 164341.46875	Train_PPYoloELoss/loss_cls: 0.7555164694786072	Train_PPYoloELoss/loss_iou: 0.4489765465259552	Train_PPYoloELoss/loss_dfl: 0.26413020491600037	Train_PPYoloELoss/loss: 1.4686237573623657	
+
+Epoch 17 (18/30)  - Valid_Inference_Time: 9174.126953125	Valid_PPYoloELoss/loss_cls: 0.0008456764626316726	Valid_PPYoloELoss/loss_iou: 0.002308470197021961	Valid_PPYoloELoss/loss_dfl: 0.0007253799121826887	Valid_PPYoloELoss/loss: 0.0038795266300439835	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 17 (18/30)  - Test_Inference_Time: 0.0	
+
+Epoch 17 (18/30)  - LR/default: 0.0002881649609962459	
+
+Epoch 18 (19/30)  - Train_Inference_Time: 120457.0390625	Train_PPYoloELoss/loss_cls: 0.7489650845527649	Train_PPYoloELoss/loss_iou: 0.4381519556045532	Train_PPYoloELoss/loss_dfl: 0.26353129744529724	Train_PPYoloELoss/loss: 1.4506489038467407	
+
+Epoch 18 (19/30)  - Valid_Inference_Time: 8341.1416015625	Valid_PPYoloELoss/loss_cls: 0.009216800332069397	Valid_PPYoloELoss/loss_iou: 0.001458414364606142	Valid_PPYoloELoss/loss_dfl: 0.0006680494407191873	Valid_PPYoloELoss/loss: 0.011343264952301979	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 18 (19/30)  - Test_Inference_Time: 0.0	
+
+Epoch 18 (19/30)  - LR/default: 0.0002620018491747721	
+
+Epoch 19 (20/30)  - Train_Inference_Time: 81582.984375	Train_PPYoloELoss/loss_cls: 0.7537616491317749	Train_PPYoloELoss/loss_iou: 0.43322625756263733	Train_PPYoloELoss/loss_dfl: 0.2635652422904968	Train_PPYoloELoss/loss: 1.4505523443222046	
+
+Epoch 19 (20/30)  - Valid_Inference_Time: 7910.27783203125	Valid_PPYoloELoss/loss_cls: 0.04971877858042717	Valid_PPYoloELoss/loss_iou: 0.002078399993479252	Valid_PPYoloELoss/loss_dfl: 0.0006649323622696102	Valid_PPYoloELoss/loss: 0.052462104707956314	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 19 (20/30)  - Test_Inference_Time: 0.0	
+
+Epoch 19 (20/30)  - LR/default: 0.00023601448737627944	
+
+Epoch 20 (21/30)  - Train_Inference_Time: 81538.796875	Train_PPYoloELoss/loss_cls: 0.7387511134147644	Train_PPYoloELoss/loss_iou: 0.42742764949798584	Train_PPYoloELoss/loss_dfl: 0.2636255919933319	Train_PPYoloELoss/loss: 1.4298042058944702	
+
+Epoch 20 (21/30)  - Valid_Inference_Time: 8003.92578125	Valid_PPYoloELoss/loss_cls: 0.1454351395368576	Valid_PPYoloELoss/loss_iou: 0.0008605262846685946	Valid_PPYoloELoss/loss_dfl: 0.0005094222724437714	Valid_PPYoloELoss/loss: 0.1468050628900528	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 20 (21/30)  - Test_Inference_Time: 0.0	
+
+Epoch 20 (21/30)  - LR/default: 0.00021055425476959797	
+
+Epoch 21 (22/30)  - Train_Inference_Time: 90586.4921875	Train_PPYoloELoss/loss_cls: 0.7328143119812012	Train_PPYoloELoss/loss_iou: 0.4201832413673401	Train_PPYoloELoss/loss_dfl: 0.26352542638778687	Train_PPYoloELoss/loss: 1.416522741317749	
+
+Epoch 21 (22/30)  - Valid_Inference_Time: 8572.2978515625	Valid_PPYoloELoss/loss_cls: 0.37581539154052734	Valid_PPYoloELoss/loss_iou: 0.0058318572118878365	Valid_PPYoloELoss/loss_dfl: 0.002813273575156927	Valid_PPYoloELoss/loss: 0.38446056842803955	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 21 (22/30)  - Test_Inference_Time: 0.0	
+
+Epoch 21 (22/30)  - LR/default: 0.00018596540312760623	
+
+Epoch 22 (23/30)  - Train_Inference_Time: 82693.96875	Train_PPYoloELoss/loss_cls: 0.7255584597587585	Train_PPYoloELoss/loss_iou: 0.40978294610977173	Train_PPYoloELoss/loss_dfl: 0.26311999559402466	Train_PPYoloELoss/loss: 1.3984618186950684	
+
+Epoch 22 (23/30)  - Valid_Inference_Time: 8111.75537109375	Valid_PPYoloELoss/loss_cls: 0.49810466170310974	Valid_PPYoloELoss/loss_iou: 0.012931518256664276	Valid_PPYoloELoss/loss_dfl: 0.007447723764926195	Valid_PPYoloELoss/loss: 0.5184840559959412	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 22 (23/30)  - Test_Inference_Time: 0.0	
+
+Epoch 22 (23/30)  - LR/default: 0.0001625804021453602	
+
+Epoch 23 (24/30)  - Train_Inference_Time: 81166.4765625	Train_PPYoloELoss/loss_cls: 0.725530207157135	Train_PPYoloELoss/loss_iou: 0.40763476490974426	Train_PPYoloELoss/loss_dfl: 0.26271748542785645	Train_PPYoloELoss/loss: 1.3958823680877686	
+
+Epoch 23 (24/30)  - Valid_Inference_Time: 8025.58837890625	Valid_PPYoloELoss/loss_cls: 0.6643295288085938	Valid_PPYoloELoss/loss_iou: 0.01591372862458229	Valid_PPYoloELoss/loss_dfl: 0.008315203711390495	Valid_PPYoloELoss/loss: 0.6885585784912109	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 23 (24/30)  - Test_Inference_Time: 0.0	
+
+Epoch 23 (24/30)  - LR/default: 0.00014071544406553372	
+
+Epoch 24 (25/30)  - Train_Inference_Time: 98717.1640625	Train_PPYoloELoss/loss_cls: 0.7089419960975647	Train_PPYoloELoss/loss_iou: 0.3907115161418915	Train_PPYoloELoss/loss_dfl: 0.26227861642837524	Train_PPYoloELoss/loss: 1.361931562423706	
+
+Epoch 24 (25/30)  - Valid_Inference_Time: 8976.58984375	Valid_PPYoloELoss/loss_cls: 0.8089355826377869	Valid_PPYoloELoss/loss_iou: 0.012210278771817684	Valid_PPYoloELoss/loss_dfl: 0.0054499441757798195	Valid_PPYoloELoss/loss: 0.826595664024353	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 24 (25/30)  - Test_Inference_Time: 0.0	
+
+Epoch 24 (25/30)  - LR/default: 0.00012066616839382835	
+
+Epoch 25 (26/30)  - Train_Inference_Time: 84738.578125	Train_PPYoloELoss/loss_cls: 0.71579909324646	Train_PPYoloELoss/loss_iou: 0.3991277813911438	Train_PPYoloELoss/loss_dfl: 0.26216253638267517	Train_PPYoloELoss/loss: 1.3770896196365356	
+
+Epoch 25 (26/30)  - Valid_Inference_Time: 8047.66064453125	Valid_PPYoloELoss/loss_cls: 0.848656952381134	Valid_PPYoloELoss/loss_iou: 0.014085688628256321	Valid_PPYoloELoss/loss_dfl: 0.006848747376352549	Valid_PPYoloELoss/loss: 0.8695915937423706	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 25 (26/30)  - Test_Inference_Time: 0.0	
+
+Epoch 25 (26/30)  - LR/default: 0.00010270366451114419	
+
+Epoch 26 (27/30)  - Train_Inference_Time: 83907.8984375	Train_PPYoloELoss/loss_cls: 0.7059639096260071	Train_PPYoloELoss/loss_iou: 0.38585343956947327	Train_PPYoloELoss/loss_dfl: 0.26206082105636597	Train_PPYoloELoss/loss: 1.3538786172866821	
+
+Epoch 26 (27/30)  - Valid_Inference_Time: 8088.37158203125	Valid_PPYoloELoss/loss_cls: 0.8525146245956421	Valid_PPYoloELoss/loss_iou: 0.01532671321183443	Valid_PPYoloELoss/loss_dfl: 0.008237743750214577	Valid_PPYoloELoss/loss: 0.8760790228843689	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 26 (27/30)  - Test_Inference_Time: 0.0	
+
+Epoch 26 (27/30)  - LR/default: 8.707080623181242e-05	
+
+Epoch 27 (28/30)  - Train_Inference_Time: 82607.9375	Train_PPYoloELoss/loss_cls: 0.7046194076538086	Train_PPYoloELoss/loss_iou: 0.38579434156417847	Train_PPYoloELoss/loss_dfl: 0.2625047564506531	Train_PPYoloELoss/loss: 1.3529186248779297	
+
+Epoch 27 (28/30)  - Valid_Inference_Time: 7911.77734375	Valid_PPYoloELoss/loss_cls: 0.8560557961463928	Valid_PPYoloELoss/loss_iou: 0.015758242458105087	Valid_PPYoloELoss/loss_dfl: 0.0080595463514328	Valid_PPYoloELoss/loss: 0.8798733949661255	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 27 (28/30)  - Test_Inference_Time: 0.0	
+
+Epoch 27 (28/30)  - LR/default: 7.397896786890224e-05	
+
+Epoch 28 (29/30)  - Train_Inference_Time: 86225.4765625	Train_PPYoloELoss/loss_cls: 0.7046508193016052	Train_PPYoloELoss/loss_iou: 0.38611674308776855	Train_PPYoloELoss/loss_dfl: 0.26219019293785095	Train_PPYoloELoss/loss: 1.3529577255249023	
+
+Epoch 28 (29/30)  - Valid_Inference_Time: 9419.8623046875	Valid_PPYoloELoss/loss_cls: 0.8667505979537964	Valid_PPYoloELoss/loss_iou: 0.009823662228882313	Valid_PPYoloELoss/loss_dfl: 0.004822930321097374	Valid_PPYoloELoss/loss: 0.8813973665237427	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 28 (29/30)  - Test_Inference_Time: 0.0	
+
+Epoch 28 (29/30)  - LR/default: 6.36051662091921e-05	
+
+Epoch 29 (30/30)  - Train_Inference_Time: 82537.953125	Train_PPYoloELoss/loss_cls: 0.7034827470779419	Train_PPYoloELoss/loss_iou: 0.38169464468955994	Train_PPYoloELoss/loss_dfl: 0.26185962557792664	Train_PPYoloELoss/loss: 1.3470377922058105	
+
+Epoch 29 (30/30)  - Valid_Inference_Time: 7944.287109375	Valid_PPYoloELoss/loss_cls: 0.9025476574897766	Valid_PPYoloELoss/loss_iou: 0.005610118620097637	Valid_PPYoloELoss/loss_dfl: 0.0037651273887604475	Valid_PPYoloELoss/loss: 0.9119229316711426	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 29 (30/30)  - Test_Inference_Time: 0.0	
+
+Epoch 29 (30/30)  - LR/default: 5.6089667041609195e-05	
+
+Epoch 30 (31/30)  - Train_Inference_Time: 83674.953125	Train_PPYoloELoss/loss_cls: 0.6962012648582458	Train_PPYoloELoss/loss_iou: 0.3757806718349457	Train_PPYoloELoss/loss_dfl: 0.26103705167770386	Train_PPYoloELoss/loss: 1.3330187797546387	
+
+Epoch 30 (31/30)  - Valid_Inference_Time: 7990.5458984375	Valid_PPYoloELoss/loss_cls: 0.8609100580215454	Valid_PPYoloELoss/loss_iou: 0.003651993116363883	Valid_PPYoloELoss/loss_dfl: 0.00269194389693439	Valid_PPYoloELoss/loss: 0.8672540187835693	Valid_Precision@0.50: 0.0	Valid_Recall@0.50: 0.0	Valid_mAP@0.50: 0.0	Valid_F1@0.50: 0.0	Valid_AP@0.50_class_0: 0.0	
+
+Epoch 30 (31/30)  - Test_Inference_Time: 0.0	
+
+Epoch 30 (31/30)  - LR/default: 5.1534088601637635e-05	

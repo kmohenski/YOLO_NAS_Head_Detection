@@ -1,0 +1,6 @@
+[2023-12-04 00:28:39] DEBUG - matplotlib - matplotlib data path: D:\Python\YOLO-NAS\DroneDetector\venv\lib\site-packages\matplotlib\mpl-data
+[2023-12-04 00:28:39] DEBUG - matplotlib - CONFIGDIR=C:\Users\Karlo\.matplotlib
+[2023-12-04 00:28:39] DEBUG - matplotlib - interactive is False
+[2023-12-04 00:28:39] DEBUG - matplotlib - platform is win32
+[2023-12-04 00:28:39] DEBUG - matplotlib - CACHEDIR=C:\Users\Karlo\.matplotlib
+[2023-12-04 00:28:39] DEBUG - matplotlib.font_manager - Using fontManager instance from C:\Users\Karlo\.matplotlib\fontlist-v330.json
